@@ -4,13 +4,15 @@ import requests
 import re
 import pandas as pd
 
-URLS = [
-    'https://www.fs.usda.gov/activity/stanislaus/recreation/camping-cabins/?recid=14833&actid=29', # stanislaus
-    'https://www.fs.usda.gov/activity/tahoe/recreation/camping-cabins/?recid=55444&actid=29', # tahoe
-    'https://www.fs.usda.gov/activity/eldorado/recreation/camping-cabins/?recid=71008&actid=29' # el dorado
-]
+URLS = {
+    'Stanislaus': 'https://www.fs.usda.gov/activity/stanislaus/recreation/camping-cabins/?recid=14833&actid=29',
+    'Tahoe': 'https://www.fs.usda.gov/activity/tahoe/recreation/camping-cabins/?recid=55444&actid=29',
+    'El Dorado': 'https://www.fs.usda.gov/activity/eldorado/recreation/camping-cabins/?recid=71008&actid=29'
+}
 
-def get_campground_urls(soup):
+def get_campground_urls(forest_url):
+    r = requests.get(forest_url)
+    soup = BeautifulSoup(r.text, 'html.parser')
     urls = []
     url_pref = 'https://www.fs.usda.gov'
     for i in soup.find_all(re.compile("h\d")):
@@ -178,5 +180,14 @@ def munge_campground_data(df):
     return df[columns]
 
 if __name__ == '__main__':
-
+    collect = []
+    for forest, url in URLS.iteritems():
+        print 'scraping {} National Forest'.format(forest)
+        urls = get_campground_urls(url)
+        df = scrape_campsite_data(urls)
+        df = munge_campground_data(df)
+        df.loc[:, 'Forest'] = forest
+        collect.append(df)
+    final = pd.concat(collect)
+    final.to_csv('./scraped_campgrounds.csv', index=False)
 
