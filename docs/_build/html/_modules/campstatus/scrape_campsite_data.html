@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>campstatus.scrape_campsite_data &mdash; CampStatus 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CampStatus 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for campstatus.scrape_campsite_data</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">import</span> <span class="nn">update_campstatus</span> <span class="kn">as</span> <span class="nn">uc</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+
+<span class="n">URLS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># &#39;Stanislaus&#39;: &#39;https://www.fs.usda.gov/activity/stanislaus/recreation/camping-cabins/?recid=14833&amp;actid=29&#39;,</span>
+    <span class="c1"># &#39;Tahoe&#39;: &#39;https://www.fs.usda.gov/activity/tahoe/recreation/camping-cabins/?recid=55444&amp;actid=29&#39;,</span>
+    <span class="s1">&#39;El Dorado&#39;</span><span class="p">:</span> <span class="s1">&#39;https://www.fs.usda.gov/activity/eldorado/recreation/camping-cabins/?recid=71008&amp;actid=29&#39;</span>
+<span class="p">}</span>
+
+<div class="viewcode-block" id="get_campground_urls"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.get_campground_urls">[docs]</a><span class="k">def</span> <span class="nf">get_campground_urls</span><span class="p">(</span><span class="n">forest_url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Retrieves all the urls for campgrounds in a national forest.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        forest_url (str): URL to the camping-cabins page of the NFS site</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of lists, with the inner list&#39;s first element being</span>
+<span class="sd">            the campground name, and the second element being the URL</span>
+<span class="sd">            for the campground.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">forest_url</span><span class="p">)</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
+    <span class="n">urls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">url_pref</span> <span class="o">=</span> <span class="s1">&#39;https://www.fs.usda.gov&#39;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;h\d&quot;</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="s1">&#39;Campground Camping Areas&#39;</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">contents</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">find_next_siblings</span><span class="p">(</span><span class="s1">&#39;ul&#39;</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">j</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">):</span>
+                    <span class="n">url</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">)</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">string</span>
+                    <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;Campground&#39;</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.pdf&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                                <span class="n">url</span> <span class="o">=</span> <span class="n">url_pref</span> <span class="o">+</span> <span class="n">url</span>
+                                <span class="n">urls</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">s</span><span class="p">,</span> <span class="n">url</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">urls</span></div>
+
+<div class="viewcode-block" id="find_tag_containing_text"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.find_tag_containing_text">[docs]</a><span class="k">def</span> <span class="nf">find_tag_containing_text</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tag</span><span class="o">.</span><span class="n">contents</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="find_elevation_div"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.find_elevation_div">[docs]</a><span class="k">def</span> <span class="nf">find_elevation_div</span><span class="p">(</span><span class="n">tag</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">find_tag_containing_text</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="s1">&#39;elevation&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="find_latitude_div"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.find_latitude_div">[docs]</a><span class="k">def</span> <span class="nf">find_latitude_div</span><span class="p">(</span><span class="n">tag</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">find_tag_containing_text</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="s1">&#39;latitude&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="find_longitude_tag"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.find_longitude_tag">[docs]</a><span class="k">def</span> <span class="nf">find_longitude_tag</span><span class="p">(</span><span class="n">tag</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">find_tag_containing_text</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="s1">&#39;longitude&#39;</span><span class="p">)</span> </div>
+
+<div class="viewcode-block" id="find_value"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.find_value">[docs]</a><span class="k">def</span> <span class="nf">find_value</span><span class="p">(</span><span class="n">soup</span><span class="p">,</span> <span class="n">tag_function</span><span class="p">):</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">tag_function</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">tag</span><span class="o">.</span><span class="n">findNextSiblings</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="get_campground_data"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.get_campground_data">[docs]</a><span class="k">def</span> <span class="nf">get_campground_data</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="c1"># parse the html</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">soup</span><span class="o">=</span><span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
+
+    <span class="c1"># get the &#39;at a glance&#39; table data</span>
+    <span class="n">table_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;h\d&quot;</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="s1">&#39;At a Glance&#39;</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">contents</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">find_next_siblings</span><span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">j</span><span class="o">.</span><span class="n">findChildren</span><span class="p">(</span><span class="s1">&#39;tr&#39;</span><span class="p">):</span>
+                    <span class="n">header</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;th&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                    <span class="n">content</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\xa0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">table_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">table_data</span><span class="p">[</span><span class="n">header</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">content</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">table_data</span><span class="p">[</span><span class="n">header</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+
+    <span class="c1"># get the data from the sidebar</span>
+    <span class="n">side_div_funcs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Elevation&#39;</span><span class="p">:</span> <span class="n">find_elevation_div</span><span class="p">,</span>
+    <span class="s1">&#39;Longitude&#39;</span><span class="p">:</span> <span class="n">find_longitude_tag</span><span class="p">,</span>
+    <span class="s1">&#39;Latitude&#39;</span><span class="p">:</span> <span class="n">find_latitude_div</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">tag_func</span> <span class="ow">in</span> <span class="n">side_div_funcs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">find_value</span><span class="p">(</span><span class="n">soup</span><span class="p">,</span> <span class="n">tag_func</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">table_data</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="c1"># get the open/closed status</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">get_campground_status</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">table_data</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
+    <span class="n">table_data</span><span class="p">[</span><span class="s1">&#39;URL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">url</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">table_data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="scrape_campsite_data"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.scrape_campsite_data">[docs]</a><span class="k">def</span> <span class="nf">scrape_campsite_data</span><span class="p">(</span><span class="n">urls</span><span class="p">):</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">campground</span><span class="p">,</span> <span class="n">camp_url</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">get_campground_data</span><span class="p">(</span><span class="n">camp_url</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Campground&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">campground</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="munge_reservations"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.munge_reservations">[docs]</a><span class="k">def</span> <span class="nf">munge_reservations</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">fcfs</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">seasonal</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;(?i).*first.{1,4}come.{1,4}first.{1,4}serve&#39;</span><span class="p">,</span> <span class="n">cell</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">fcfs</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="s1">&#39;no reservations&#39;</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">fcfs</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;no&#39;</span><span class="p">,</span><span class="s1">&#39;none.&#39;</span><span class="p">]:</span>
+        <span class="n">fcfs</span> <span class="o">=</span> <span class="bp">True</span>
+        
+    <span class="k">if</span> <span class="s1">&#39;for reservations&#39;</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="s1">&#39;recreation.gov&#39;</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">()[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;yes&#39;</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;recreation.pge.com&#39;</span><span class="p">,]:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">True</span>
+    
+    <span class="k">if</span> <span class="s1">&#39;winter&#39;</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;summer&#39;</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">seasonal</span> <span class="o">=</span> <span class="bp">True</span>
+    
+    <span class="k">if</span> <span class="n">seasonal</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;seasonal&#39;</span>
+    
+    <span class="k">if</span> <span class="n">fcfs</span> <span class="ow">and</span> <span class="n">res</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;both&#39;</span>
+    <span class="k">elif</span> <span class="n">fcfs</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;fcfs&#39;</span>
+    <span class="k">elif</span> <span class="n">res</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;reservations only&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span> <span class="n">cell</span>
+        <span class="k">return</span> <span class="n">cell</span></div>
+
+<div class="viewcode-block" id="munge_fees"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.munge_fees">[docs]</a><span class="k">def</span> <span class="nf">munge_fees</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">fees</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;\$\d+\.{0,1}\d*&#39;</span><span class="p">,</span> <span class="n">cell</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fees</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;no fee&#39;</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">fee</span> <span class="o">=</span> <span class="s1">&#39;$0&#39;</span>
+        <span class="k">elif</span> <span class="s1">&#39;donation&#39;</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">fee</span> <span class="o">=</span> <span class="s1">&#39;$0&#39;</span>
+        <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;free&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">]:</span>
+            <span class="n">fee</span> <span class="o">=</span> <span class="s1">&#39;$0&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fee</span> <span class="o">=</span> <span class="n">cell</span>
+            <span class="k">print</span> <span class="n">cell</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fee</span> <span class="o">=</span> <span class="n">fees</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">fee</span></div>
+
+<div class="viewcode-block" id="munge_water"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.munge_water">[docs]</a><span class="k">def</span> <span class="nf">munge_water</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">water</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;potable&#39;</span><span class="p">:</span>
+        <span class="n">water</span> <span class="o">=</span>  <span class="bp">True</span>
+    <span class="k">elif</span> <span class="s1">&#39;is available&#39;</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="s1">&#39;untreated&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">water</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="s1">&#39;piped water&#39;</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">water</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;potable water&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">]:</span>
+        <span class="n">water</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">return</span> <span class="n">water</span></div>
+
+<div class="viewcode-block" id="munge_restrooms"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.munge_restrooms">[docs]</a><span class="k">def</span> <span class="nf">munge_restrooms</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">vault</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">flush</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="s1">&#39;vault&#39;</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">vault</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;yes&#39;</span><span class="p">]:</span>
+        <span class="n">vault</span><span class="o">=</span><span class="bp">True</span>
+    
+    <span class="k">if</span> <span class="s1">&#39;flush&#39;</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">flush</span> <span class="o">=</span> <span class="bp">True</span>
+    
+    <span class="k">if</span> <span class="n">vault</span> <span class="ow">and</span> <span class="n">flush</span><span class="p">:</span>
+        <span class="n">restroom</span> <span class="o">=</span> <span class="s1">&#39;Both&#39;</span>
+    <span class="k">elif</span> <span class="n">vault</span><span class="p">:</span>
+        <span class="n">restroom</span> <span class="o">=</span> <span class="s1">&#39;Vault&#39;</span>
+    <span class="k">elif</span> <span class="n">flush</span><span class="p">:</span>
+        <span class="n">restroom</span> <span class="o">=</span> <span class="s1">&#39;Flush&#39;</span>
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;no&#39;</span><span class="p">:</span>
+        <span class="n">restroom</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">restroom</span> <span class="o">=</span> <span class="n">cell</span>
+        <span class="k">print</span> <span class="n">cell</span>
+        
+    <span class="k">return</span> <span class="n">restroom</span></div>
+
+<div class="viewcode-block" id="munge_elevation"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.munge_elevation">[docs]</a><span class="k">def</span> <span class="nf">munge_elevation</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;\d*&#39;</span><span class="p">,</span> <span class="n">cell</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="munge_campground_data"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.munge_campground_data">[docs]</a><span class="k">def</span> <span class="nf">munge_campground_data</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="c1"># &#39;Munging reservations...&#39;</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Reservations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Reservations&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">munge_reservations</span><span class="p">)</span>
+    <span class="c1"># &#39;Munging fees...&#39;</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Fees&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Fees&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">munge_fees</span><span class="p">)</span>
+    <span class="c1"># &#39;Munging water...&#39;</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Potable Water&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Water&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">munge_water</span><span class="p">)</span>
+    <span class="c1"># &#39;Munging restrooms...&#39;</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Restroom&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Restroom&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">munge_restrooms</span><span class="p">)</span>
+    <span class="c1"># &#39;Munging elevation...&#39;</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Elevation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Elevation&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">munge_elevation</span><span class="p">)</span>
+
+    <span class="n">df</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;Campground&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Status&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Fees&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Open Season&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Reservations&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Restroom&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Potable Water&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Elevation&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Latitude&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Longitude&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Usage&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Water&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;URL&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="scrape_all_forests"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.scrape_all_forests">[docs]</a><span class="k">def</span> <span class="nf">scrape_all_forests</span><span class="p">(</span><span class="n">URLS</span><span class="p">):</span>
+    <span class="n">collect</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">forest</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">URLS</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="k">print</span> <span class="s1">&#39;scraping {} National Forest&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">forest</span><span class="p">)</span>
+        <span class="n">urls</span> <span class="o">=</span> <span class="n">get_campground_urls</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">scrape_campsite_data</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">munge_campground_data</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Forest&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">forest</span>
+        <span class="n">collect</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">final</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">collect</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">final</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">final</span> <span class="o">=</span> <span class="n">scrape_all_forests</span><span class="p">(</span><span class="n">URLS</span><span class="p">)</span>
+    <span class="n">final</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;./scraped_campgrounds.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Onur Erbilgin.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

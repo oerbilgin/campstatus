@@ -12,7 +12,14 @@ URLS = {
 
 def get_campground_urls(forest_url):
     """Retrieves all the urls for campgrounds in a national forest.
+
     Args:
+        forest_url (str): URL to the camping-cabins page of the NFS site
+
+    Returns:
+        A list of lists, with the inner list's first element being
+            the campground name, and the second element being the URL
+            for the campground.
 
     """
     r = requests.get(forest_url)
