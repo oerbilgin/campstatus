@@ -5,12 +5,16 @@ import re
 import pandas as pd
 
 URLS = {
-    'Stanislaus': 'https://www.fs.usda.gov/activity/stanislaus/recreation/camping-cabins/?recid=14833&actid=29',
-    'Tahoe': 'https://www.fs.usda.gov/activity/tahoe/recreation/camping-cabins/?recid=55444&actid=29',
+    # 'Stanislaus': 'https://www.fs.usda.gov/activity/stanislaus/recreation/camping-cabins/?recid=14833&actid=29',
+    # 'Tahoe': 'https://www.fs.usda.gov/activity/tahoe/recreation/camping-cabins/?recid=55444&actid=29',
     'El Dorado': 'https://www.fs.usda.gov/activity/eldorado/recreation/camping-cabins/?recid=71008&actid=29'
 }
 
 def get_campground_urls(forest_url):
+    """Retrieves all the urls for campgrounds in a national forest.
+    Args:
+
+    """
     r = requests.get(forest_url)
     soup = BeautifulSoup(r.text, 'html.parser')
     urls = []
@@ -28,9 +32,36 @@ def get_campground_urls(forest_url):
                                 urls.append([s, url])
     return urls
 
+def find_tag_containing_text(tag, text):
+    result = False
+    for x in tag.contents:
+        try:
+            if text in x.lower():
+                result = True
+        except:
+            pass
+    return result
+
+def find_elevation_div(tag):
+    return find_tag_containing_text(tag, 'elevation')
+
+def find_latitude_div(tag):
+    return find_tag_containing_text(tag, 'latitude')
+
+def find_longitude_tag(tag):
+    return find_tag_containing_text(tag, 'longitude') 
+
+def find_value(soup, tag_function):
+    tag = soup.find_all(tag_function)[0]
+    val = tag.findNextSiblings()[0].text.strip()
+    return val
+
 def get_campground_data(url):
+    # parse the html
     r = requests.get(url)
     soup=BeautifulSoup(r.text, 'html.parser')
+
+    # get the 'at a glance' table data
     table_data = {}
     for i in soup.find_all(re.compile("h\d")):
         if 'At a Glance' in i.contents:
@@ -42,6 +73,21 @@ def get_campground_data(url):
                         table_data[header] = [content]
                     else:
                         table_data[header].append(content)
+
+    # get the data from the sidebar
+    side_div_funcs = {
+    'Elevation': find_elevation_div,
+    'Longitude': find_longitude_tag,
+    'Latitude': find_latitude_div,
+    }
+    for label, tag_func in side_div_funcs.iteritems():
+        try:
+            val = find_value(soup, tag_func)
+        except Exception as e:
+            val = pd.np.nan
+        table_data[label] = val
+
+    # get the open/closed status
     status = uc.get_campground_status(url)
     table_data['Status'] = status
     table_data['URL'] = url
@@ -155,15 +201,23 @@ def munge_restrooms(cell):
         
     return restroom
 
+def munge_elevation(cell):
+    if pd.isnull(cell):
+        return ''
+    return int(''.join(re.findall('\d*', cell)))
+
 def munge_campground_data(df):
-    print 'Munging reservations...'
+    # 'Munging reservations...'
     df.loc[:, 'Reservations'] = df['Reservations'].apply(munge_reservations)
-    print 'Munging fees...'
+    # 'Munging fees...'
     df.loc[:, 'Fees'] = df['Fees'].apply(munge_fees)
-    print 'Munging water...'
+    # 'Munging water...'
     df.loc[:, 'Potable Water'] = df['Water'].apply(munge_water)
-    print 'Munging restrooms...'
+    # 'Munging restrooms...'
     df.loc[:, 'Restroom'] = df['Restroom'].apply(munge_restrooms)
+    # 'Munging elevation...'
+    df.loc[:, 'Elevation'] = df['Elevation'].apply(munge_elevation)
+
     df.fillna('', inplace=True)
     columns = [
         'Campground',
@@ -173,13 +227,16 @@ def munge_campground_data(df):
         'Reservations',
         'Restroom',
         'Potable Water',
+        'Elevation',
+        'Latitude',
+        'Longitude',
         'Usage',
         'Water',
-        'URL'
+        'URL',
         ]
     return df[columns]
 
-if __name__ == '__main__':
+def scrape_all_forests(URLS):
     collect = []
     for forest, url in URLS.iteritems():
         print 'scraping {} National Forest'.format(forest)
@@ -189,5 +246,9 @@ if __name__ == '__main__':
         df.loc[:, 'Forest'] = forest
         collect.append(df)
     final = pd.concat(collect)
+    return final
+
+if __name__ == '__main__':
+    final = scrape_all_forests(URLS)
     final.to_csv('./scraped_campgrounds.csv', index=False)
 
