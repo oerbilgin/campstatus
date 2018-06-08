@@ -24,6 +24,8 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="CampStatus 0.1 documentation" href="../index.html" />
+    <link rel="up" title="campstatus" href="modules.html" />
+    <link rel="prev" title="campstatus" href="modules.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -49,35 +51,218 @@
 </div>
 <div class="section" id="module-campstatus.scrape_campsite_data">
 <span id="campstatus-scrape-campsite-data-module"></span><h2>campstatus.scrape_campsite_data module<a class="headerlink" href="#module-campstatus.scrape_campsite_data" title="Permalink to this headline">¶</a></h2>
+<p>Summary</p>
+<dl class="attribute">
+<dt id="campstatus.scrape_campsite_data.URLS">
+<code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">URLS</code><a class="headerlink" href="#campstatus.scrape_campsite_data.URLS" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> &#8211; Contains forest names and the url to the camping-cabins
+page for each forest.</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="campstatus.scrape_campsite_data.find_elevation_div">
 <code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">find_elevation_div</code><span class="sig-paren">(</span><em>tag</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#find_elevation_div"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.find_elevation_div" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Helper to find tags about elevation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tag</strong> (<em>bs4.element.tag</em>) &#8211; Tag from BeautifulSoup parsed HTML site.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>True when the text &#8216;elevation&#8217; was found in the tag&#8217;s contents,</dt>
+<dd>False if not.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li><a class="reference internal" href="#campstatus.scrape_campsite_data.find_value" title="campstatus.scrape_campsite_data.find_value"><code class="xref py py-func docutils literal"><span class="pre">find_value()</span></code></a></li>
+</ul>
+</div>
+</dd></dl>
 
 <dl class="function">
 <dt id="campstatus.scrape_campsite_data.find_latitude_div">
 <code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">find_latitude_div</code><span class="sig-paren">(</span><em>tag</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#find_latitude_div"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.find_latitude_div" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Helper to find tags about elevation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tag</strong> (<em>bs4.element.tag</em>) &#8211; Tag from BeautifulSoup parsed HTML site.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>True when the text &#8216;latitude&#8217; was found in the tag&#8217;s contents,</dt>
+<dd>False if not.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li><a class="reference internal" href="#campstatus.scrape_campsite_data.find_value" title="campstatus.scrape_campsite_data.find_value"><code class="xref py py-func docutils literal"><span class="pre">find_value()</span></code></a></li>
+</ul>
+</div>
+</dd></dl>
 
 <dl class="function">
 <dt id="campstatus.scrape_campsite_data.find_longitude_tag">
 <code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">find_longitude_tag</code><span class="sig-paren">(</span><em>tag</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#find_longitude_tag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.find_longitude_tag" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Helper to find tags about elevation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tag</strong> (<em>bs4.element.tag</em>) &#8211; Tag from BeautifulSoup parsed HTML site.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>True when the text &#8216;longitude&#8217; was found in the tag&#8217;s contents,</dt>
+<dd>False if not.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li><a class="reference internal" href="#campstatus.scrape_campsite_data.find_value" title="campstatus.scrape_campsite_data.find_value"><code class="xref py py-func docutils literal"><span class="pre">find_value()</span></code></a></li>
+</ul>
+</div>
+</dd></dl>
 
 <dl class="function">
 <dt id="campstatus.scrape_campsite_data.find_tag_containing_text">
 <code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">find_tag_containing_text</code><span class="sig-paren">(</span><em>tag</em>, <em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#find_tag_containing_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.find_tag_containing_text" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>BeautifulSoup find_all function to find tags that contain a text pattern</p>
+<p>Since find_all does not take any args, it must be wrapped with
+another function so that the text pattern can be passed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tag</strong> (<em>bs4.element.tag</em>) &#8211; Tag from BeautifulSoup parsed HTML site.</li>
+<li><strong>text</strong> (<em>str</em>) &#8211; text to search a tag&#8217;s elements for. Case insensitive.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>True when the text was found in the tag&#8217;s contents, False</dt>
+<dd><p class="first last">if not.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="simple">
+<li><a class="reference internal" href="#campstatus.scrape_campsite_data.find_elevation_div" title="campstatus.scrape_campsite_data.find_elevation_div"><code class="xref py py-func docutils literal"><span class="pre">find_elevation_div()</span></code></a></li>
+<li><a class="reference internal" href="#campstatus.scrape_campsite_data.find_latitude_div" title="campstatus.scrape_campsite_data.find_latitude_div"><code class="xref py py-func docutils literal"><span class="pre">find_latitude_div()</span></code></a></li>
+<li><a class="reference internal" href="#campstatus.scrape_campsite_data.find_longitude_tag" title="campstatus.scrape_campsite_data.find_longitude_tag"><code class="xref py py-func docutils literal"><span class="pre">find_longitude_tag()</span></code></a></li>
+</ul>
+<p class="last">find_elevation_div: func1
+find_latitude_div: func2</p>
+</div>
+</dd></dl>
 
 <dl class="function">
 <dt id="campstatus.scrape_campsite_data.find_value">
 <code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">find_value</code><span class="sig-paren">(</span><em>soup</em>, <em>tag_function</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#find_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.find_value" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Gets the value in the element after the first found tag.</p>
+<p>This is used to scrape the table in the campground&#8217;s side bar that
+contains elevation, latitude, and longitude data. These data are
+in divs, not an HTML table. For example, the data for elevation is
+in the div after the div that contains the text &#8220;elevation&#8221;. This
+function finds the first tag containing certain text, then returns
+the contents of the first sibling after that element.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>soup</strong> (<em>bs4.BeautifulSoup</em>) &#8211; Parsed HTML text of campground website.</li>
+<li><strong>tag_function</strong> (<em>func</em>) &#8211; function to find tags whose contents
+contain the desired text.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>Contents of the element after the tag that contains the</dt>
+<dd><p class="first last">searched-for text.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">find_value</span><span class="p">(</span><span class="n">soup</span><span class="p">,</span> <span class="n">find_elevation_tag</span><span class="p">)</span>
+<span class="go">&#39;5,000 ft&#39;</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li><a class="reference internal" href="#campstatus.scrape_campsite_data.get_campground_data" title="campstatus.scrape_campsite_data.get_campground_data"><code class="xref py py-func docutils literal"><span class="pre">get_campground_data()</span></code></a></li>
+</ul>
+</div>
+</dd></dl>
 
 <dl class="function">
 <dt id="campstatus.scrape_campsite_data.get_campground_data">
 <code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">get_campground_data</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#get_campground_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.get_campground_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Scrapes all the desired data for a campground.</p>
+<p>Collects all of the data in the &#8220;At a Glance&#8221; section of the
+campground webpage, and elevation, longitude, and latitude on the
+side of the webpage and stores it in a dictionary. The dictionary
+is then converted to a pandas.DataFrame, which will eventually be
+a row in the final table.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> (<em>str</em>) &#8211; URL to the campground webpage.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>single-row table with columns of all the</dt>
+<dd>data that was scraped.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">pandas.DataFrame</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li><a class="reference internal" href="#campstatus.scrape_campsite_data.scrape_campsite_data" title="campstatus.scrape_campsite_data.scrape_campsite_data"><code class="xref py py-func docutils literal"><span class="pre">scrape_campsite_data()</span></code></a></li>
+</ul>
+</div>
+</dd></dl>
 
 <dl class="function">
 <dt id="campstatus.scrape_campsite_data.get_campground_urls">
@@ -90,55 +275,178 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>forest_url</strong> (<em>str</em>) &#8211; URL to the camping-cabins page of the NFS site</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
-<dt>A list of lists, with the inner list&#8217;s first element being</dt>
+<dt>with the inner list&#8217;s first element being</dt>
 <dd>the campground name, and the second element being the URL
 for the campground.</dd>
 </dl>
 </td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list(list(str, ))</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li><a class="reference internal" href="#campstatus.scrape_campsite_data.scrape_all_forests" title="campstatus.scrape_campsite_data.scrape_all_forests"><code class="xref py py-func docutils literal"><span class="pre">scrape_all_forests()</span></code></a></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="campstatus.scrape_campsite_data.munge_campground_data">
+<code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">munge_campground_data</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#munge_campground_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.munge_campground_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>df</strong> (<em>TYPE</em>) &#8211; Description</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Description</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">TYPE</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="campstatus.scrape_campsite_data.munge_campground_data">
-<code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">munge_campground_data</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#munge_campground_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.munge_campground_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="campstatus.scrape_campsite_data.munge_elevation">
 <code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">munge_elevation</code><span class="sig-paren">(</span><em>cell</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#munge_elevation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.munge_elevation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Summary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell</strong> (<em>TYPE</em>) &#8211; Description</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Description</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">TYPE</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="campstatus.scrape_campsite_data.munge_fees">
 <code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">munge_fees</code><span class="sig-paren">(</span><em>cell</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#munge_fees"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.munge_fees" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Summary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell</strong> (<em>TYPE</em>) &#8211; Description</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Description</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">TYPE</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="campstatus.scrape_campsite_data.munge_reservations">
 <code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">munge_reservations</code><span class="sig-paren">(</span><em>cell</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#munge_reservations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.munge_reservations" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Summary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell</strong> (<em>TYPE</em>) &#8211; Description</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Description</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">TYPE</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="campstatus.scrape_campsite_data.munge_restrooms">
 <code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">munge_restrooms</code><span class="sig-paren">(</span><em>cell</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#munge_restrooms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.munge_restrooms" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Summary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell</strong> (<em>TYPE</em>) &#8211; Description</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Description</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">TYPE</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="campstatus.scrape_campsite_data.munge_water">
 <code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">munge_water</code><span class="sig-paren">(</span><em>cell</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#munge_water"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.munge_water" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Summary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell</strong> (<em>TYPE</em>) &#8211; Description</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Description</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">TYPE</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="campstatus.scrape_campsite_data.scrape_all_forests">
 <code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">scrape_all_forests</code><span class="sig-paren">(</span><em>URLS</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#scrape_all_forests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.scrape_all_forests" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Summary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>URLS</strong> (<em>TYPE</em>) &#8211; Description</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Description</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">TYPE</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="campstatus.scrape_campsite_data.scrape_campsite_data">
 <code class="descclassname">campstatus.scrape_campsite_data.</code><code class="descname">scrape_campsite_data</code><span class="sig-paren">(</span><em>urls</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/campstatus/scrape_campsite_data.html#scrape_campsite_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#campstatus.scrape_campsite_data.scrape_campsite_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Creates a table of campground data given a list of campground URLs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>urls</strong> (<em>list(str, )</em>) &#8211; list of URLs pointing to campground webpages</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>Table of all the aggregated data from all</dt>
+<dd>the campgrounds pointed to by <cite>urls</cite>. Each row is one
+campground.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">pandas.DataFrame</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li><a class="reference internal" href="#campstatus.scrape_campsite_data.scrape_all_forests" title="campstatus.scrape_campsite_data.scrape_all_forests"><code class="xref py py-func docutils literal"><span class="pre">scrape_all_forests()</span></code></a></li>
+</ul>
+</div>
+</dd></dl>
 
 </div>
 <div class="section" id="module-campstatus.update_campstatus">
@@ -203,6 +511,9 @@ for the campground.</dd>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">campstatus</a><ul>
+      <li>Previous: <a href="modules.html" title="previous chapter">campstatus</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>

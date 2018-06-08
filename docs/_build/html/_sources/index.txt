@@ -11,6 +11,9 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   source/modules
+   source/campstatus
+   ../readme
 
 
 Indices and tables

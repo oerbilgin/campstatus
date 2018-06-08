@@ -1,3 +1,9 @@
+"""Summary
+
+Attributes:
+    URLS (dict): Contains forest names and the url to the camping-cabins
+        page for each forest.
+"""
 from bs4 import BeautifulSoup
 import update_campstatus as uc
 import requests
@@ -12,14 +18,17 @@ URLS = {
 
 def get_campground_urls(forest_url):
     """Retrieves all the urls for campgrounds in a national forest.
-
+    
     Args:
         forest_url (str): URL to the camping-cabins page of the NFS site
-
+    
     Returns:
-        A list of lists, with the inner list's first element being
+        list(list(str, )): with the inner list's first element being
             the campground name, and the second element being the URL
             for the campground.
+    
+    See Also:
+        * :func:`scrape_all_forests`
 
     """
     r = requests.get(forest_url)
@@ -40,30 +49,128 @@ def get_campground_urls(forest_url):
     return urls
 
 def find_tag_containing_text(tag, text):
+    """BeautifulSoup find_all function to find tags that contain a text pattern
+    
+    Since find_all does not take any args, it must be wrapped with
+    another function so that the text pattern can be passed.
+    
+    Args:
+        tag (bs4.element.tag): Tag from BeautifulSoup parsed HTML site.
+        text (str): text to search a tag's elements for. Case insensitive.
+    
+    Returns:
+        bool: True when the text was found in the tag's contents, False
+            if not.
+    
+    See Also:
+        * :func:`find_elevation_div`
+        * :func:`find_latitude_div`
+        * :func:`find_longitude_tag`
+
+    """
     result = False
     for x in tag.contents:
         try:
-            if text in x.lower():
+            if text.lower() in x.lower():
                 result = True
         except:
             pass
     return result
 
 def find_elevation_div(tag):
+    """Helper to find tags about elevation.
+    
+    Args:
+        tag (bs4.element.tag): Tag from BeautifulSoup parsed HTML site.
+    
+    Returns:
+        bool: True when the text 'elevation' was found in the tag's contents,
+            False if not.
+
+    See Also:
+        * :func:`find_value`
+    """
     return find_tag_containing_text(tag, 'elevation')
 
 def find_latitude_div(tag):
+    """Helper to find tags about elevation.
+    
+    Args:
+        tag (bs4.element.tag): Tag from BeautifulSoup parsed HTML site.
+    
+    Returns:
+        bool: True when the text 'latitude' was found in the tag's contents,
+            False if not.
+
+    See Also:
+        * :func:`find_value`
+    """
     return find_tag_containing_text(tag, 'latitude')
 
 def find_longitude_tag(tag):
+    """Helper to find tags about elevation.
+    
+    Args:
+        tag (bs4.element.tag): Tag from BeautifulSoup parsed HTML site.
+    
+    Returns:
+        bool: True when the text 'longitude' was found in the tag's contents,
+            False if not.
+
+    See Also:
+        * :func:`find_value`
+    """
     return find_tag_containing_text(tag, 'longitude') 
 
 def find_value(soup, tag_function):
+    """Gets the value in the element after the first found tag.
+
+    This is used to scrape the table in the campground's side bar that
+    contains elevation, latitude, and longitude data. These data are
+    in divs, not an HTML table. For example, the data for elevation is
+    in the div after the div that contains the text "elevation". This
+    function finds the first tag containing certain text, then returns
+    the contents of the first sibling after that element.
+    
+    Args:
+        soup (bs4.BeautifulSoup): Parsed HTML text of campground website.
+        tag_function (func): function to find tags whose contents
+            contain the desired text.
+    
+    Returns:
+        str: Contents of the element after the tag that contains the
+            searched-for text.
+
+    Examples:
+        >>> find_value(soup, find_elevation_tag)
+        '5,000 ft'
+    
+    See Also:
+        * :func:`get_campground_data`
+    """
     tag = soup.find_all(tag_function)[0]
     val = tag.findNextSiblings()[0].text.strip()
     return val
 
 def get_campground_data(url):
+    """Scrapes all the desired data for a campground.
+
+    Collects all of the data in the "At a Glance" section of the
+    campground webpage, and elevation, longitude, and latitude on the
+    side of the webpage and stores it in a dictionary. The dictionary
+    is then converted to a pandas.DataFrame, which will eventually be
+    a row in the final table.
+    
+    Args:
+        url (str): URL to the campground webpage.
+    
+    Returns:
+        pandas.DataFrame: single-row table with columns of all the
+            data that was scraped.
+
+    See Also:
+        * :func:`scrape_campsite_data`
+    """
     # parse the html
     r = requests.get(url)
     soup=BeautifulSoup(r.text, 'html.parser')
@@ -101,6 +208,19 @@ def get_campground_data(url):
     return pd.DataFrame(table_data)
 
 def scrape_campsite_data(urls):
+    """Creates a table of campground data given a list of campground URLs.
+    
+    Args:
+        urls (list(str, )): list of URLs pointing to campground webpages
+    
+    Returns:
+        pandas.DataFrame: Table of all the aggregated data from all
+            the campgrounds pointed to by `urls`. Each row is one
+            campground.
+
+    See Also:
+        * :func:`scrape_all_forests`
+    """
     rows = []
     for campground, camp_url in urls:
         data = get_campground_data(camp_url)
@@ -110,6 +230,14 @@ def scrape_campsite_data(urls):
     return df
 
 def munge_reservations(cell):
+    """Summary
+    
+    Args:
+        cell (TYPE): Description
+    
+    Returns:
+        TYPE: Description
+    """
     if pd.isnull(cell):
         return ''
     fcfs = False
@@ -148,6 +276,14 @@ def munge_reservations(cell):
         return cell
 
 def munge_fees(cell):
+    """Summary
+    
+    Args:
+        cell (TYPE): Description
+    
+    Returns:
+        TYPE: Description
+    """
     if pd.isnull(cell):
         return ''
     fees = re.findall('\$\d+\.{0,1}\d*', cell)
@@ -167,6 +303,14 @@ def munge_fees(cell):
     return fee
 
 def munge_water(cell):
+    """Summary
+    
+    Args:
+        cell (TYPE): Description
+    
+    Returns:
+        TYPE: Description
+    """
     if pd.isnull(cell):
         return ''
     water = False
@@ -182,6 +326,14 @@ def munge_water(cell):
     return water
 
 def munge_restrooms(cell):
+    """Summary
+    
+    Args:
+        cell (TYPE): Description
+    
+    Returns:
+        TYPE: Description
+    """
     if pd.isnull(cell):
         return ''
     vault = False
@@ -209,11 +361,27 @@ def munge_restrooms(cell):
     return restroom
 
 def munge_elevation(cell):
+    """Summary
+    
+    Args:
+        cell (TYPE): Description
+    
+    Returns:
+        TYPE: Description
+    """
     if pd.isnull(cell):
         return ''
     return int(''.join(re.findall('\d*', cell)))
 
 def munge_campground_data(df):
+    """Summary
+    
+    Args:
+        df (TYPE): Description
+    
+    Returns:
+        TYPE: Description
+    """
     # 'Munging reservations...'
     df.loc[:, 'Reservations'] = df['Reservations'].apply(munge_reservations)
     # 'Munging fees...'
@@ -244,6 +412,14 @@ def munge_campground_data(df):
     return df[columns]
 
 def scrape_all_forests(URLS):
+    """Summary
+    
+    Args:
+        URLS (TYPE): Description
+    
+    Returns:
+        TYPE: Description
+    """
     collect = []
     for forest, url in URLS.iteritems():
         print 'scraping {} National Forest'.format(forest)

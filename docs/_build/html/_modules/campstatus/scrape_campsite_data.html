@@ -41,7 +41,13 @@
           <div class="body" role="main">
             
   <h1>Source code for campstatus.scrape_campsite_data</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span></span><span class="sd">&quot;&quot;&quot;Summary</span>
+
+<span class="sd">Attributes:</span>
+<span class="sd">    URLS (dict): Contains forest names and the url to the camping-cabins</span>
+<span class="sd">        page for each forest.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
 <span class="kn">import</span> <span class="nn">update_campstatus</span> <span class="kn">as</span> <span class="nn">uc</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -55,14 +61,17 @@
 
 <div class="viewcode-block" id="get_campground_urls"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.get_campground_urls">[docs]</a><span class="k">def</span> <span class="nf">get_campground_urls</span><span class="p">(</span><span class="n">forest_url</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Retrieves all the urls for campgrounds in a national forest.</span>
-
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        forest_url (str): URL to the camping-cabins page of the NFS site</span>
-
+<span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        A list of lists, with the inner list&#39;s first element being</span>
+<span class="sd">        list(list(str, )): with the inner list&#39;s first element being</span>
 <span class="sd">            the campground name, and the second element being the URL</span>
 <span class="sd">            for the campground.</span>
+<span class="sd">    </span>
+<span class="sd">    See Also:</span>
+<span class="sd">        * :func:`scrape_all_forests`</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">forest_url</span><span class="p">)</span>
@@ -83,30 +92,130 @@
     <span class="k">return</span> <span class="n">urls</span></div>
 
 <div class="viewcode-block" id="find_tag_containing_text"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.find_tag_containing_text">[docs]</a><span class="k">def</span> <span class="nf">find_tag_containing_text</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;BeautifulSoup find_all function to find tags that contain a text pattern</span>
+<span class="sd">    </span>
+<span class="sd">    Since find_all does not take any args, it must be wrapped with</span>
+<span class="sd">    another function so that the text pattern can be passed.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        tag (bs4.element.tag): Tag from BeautifulSoup parsed HTML site.</span>
+<span class="sd">        text (str): text to search a tag&#39;s elements for. Case insensitive.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True when the text was found in the tag&#39;s contents, False</span>
+<span class="sd">            if not.</span>
+<span class="sd">    </span>
+<span class="sd">    See Also:</span>
+<span class="sd">        * :func:`find_elevation_div`</span>
+<span class="sd">        * :func:`find_latitude_div`</span>
+<span class="sd">        * :func:`find_longitude_tag`</span>
+
+<span class="sd">        find_elevation_div: func1</span>
+<span class="sd">        find_latitude_div: func2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tag</span><span class="o">.</span><span class="n">contents</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="bp">True</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">pass</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="find_elevation_div"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.find_elevation_div">[docs]</a><span class="k">def</span> <span class="nf">find_elevation_div</span><span class="p">(</span><span class="n">tag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper to find tags about elevation.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        tag (bs4.element.tag): Tag from BeautifulSoup parsed HTML site.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True when the text &#39;elevation&#39; was found in the tag&#39;s contents,</span>
+<span class="sd">            False if not.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * :func:`find_value`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">find_tag_containing_text</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="s1">&#39;elevation&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="find_latitude_div"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.find_latitude_div">[docs]</a><span class="k">def</span> <span class="nf">find_latitude_div</span><span class="p">(</span><span class="n">tag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper to find tags about elevation.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        tag (bs4.element.tag): Tag from BeautifulSoup parsed HTML site.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True when the text &#39;latitude&#39; was found in the tag&#39;s contents,</span>
+<span class="sd">            False if not.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * :func:`find_value`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">find_tag_containing_text</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="s1">&#39;latitude&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="find_longitude_tag"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.find_longitude_tag">[docs]</a><span class="k">def</span> <span class="nf">find_longitude_tag</span><span class="p">(</span><span class="n">tag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper to find tags about elevation.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        tag (bs4.element.tag): Tag from BeautifulSoup parsed HTML site.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True when the text &#39;longitude&#39; was found in the tag&#39;s contents,</span>
+<span class="sd">            False if not.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * :func:`find_value`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">find_tag_containing_text</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="s1">&#39;longitude&#39;</span><span class="p">)</span> </div>
 
 <div class="viewcode-block" id="find_value"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.find_value">[docs]</a><span class="k">def</span> <span class="nf">find_value</span><span class="p">(</span><span class="n">soup</span><span class="p">,</span> <span class="n">tag_function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the value in the element after the first found tag.</span>
+
+<span class="sd">    This is used to scrape the table in the campground&#39;s side bar that</span>
+<span class="sd">    contains elevation, latitude, and longitude data. These data are</span>
+<span class="sd">    in divs, not an HTML table. For example, the data for elevation is</span>
+<span class="sd">    in the div after the div that contains the text &quot;elevation&quot;. This</span>
+<span class="sd">    function finds the first tag containing certain text, then returns</span>
+<span class="sd">    the contents of the first sibling after that element.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        soup (bs4.BeautifulSoup): Parsed HTML text of campground website.</span>
+<span class="sd">        tag_function (func): function to find tags whose contents</span>
+<span class="sd">            contain the desired text.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Contents of the element after the tag that contains the</span>
+<span class="sd">            searched-for text.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; find_value(soup, find_elevation_tag)</span>
+<span class="sd">        &#39;5,000 ft&#39;</span>
+<span class="sd">    </span>
+<span class="sd">    See Also:</span>
+<span class="sd">        * :func:`get_campground_data`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">tag</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">tag_function</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">val</span> <span class="o">=</span> <span class="n">tag</span><span class="o">.</span><span class="n">findNextSiblings</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">val</span></div>
 
 <div class="viewcode-block" id="get_campground_data"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.get_campground_data">[docs]</a><span class="k">def</span> <span class="nf">get_campground_data</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scrapes all the desired data for a campground.</span>
+
+<span class="sd">    Collects all of the data in the &quot;At a Glance&quot; section of the</span>
+<span class="sd">    campground webpage, and elevation, longitude, and latitude on the</span>
+<span class="sd">    side of the webpage and stores it in a dictionary. The dictionary</span>
+<span class="sd">    is then converted to a pandas.DataFrame, which will eventually be</span>
+<span class="sd">    a row in the final table.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        url (str): URL to the campground webpage.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: single-row table with columns of all the</span>
+<span class="sd">            data that was scraped.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * :func:`scrape_campsite_data`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># parse the html</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
     <span class="n">soup</span><span class="o">=</span><span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
@@ -144,6 +253,19 @@
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">table_data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="scrape_campsite_data"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.scrape_campsite_data">[docs]</a><span class="k">def</span> <span class="nf">scrape_campsite_data</span><span class="p">(</span><span class="n">urls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates a table of campground data given a list of campground URLs.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        urls (list(str, )): list of URLs pointing to campground webpages</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: Table of all the aggregated data from all</span>
+<span class="sd">            the campgrounds pointed to by `urls`. Each row is one</span>
+<span class="sd">            campground.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * :func:`scrape_all_forests`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">campground</span><span class="p">,</span> <span class="n">camp_url</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">get_campground_data</span><span class="p">(</span><span class="n">camp_url</span><span class="p">)</span>
@@ -153,6 +275,14 @@
     <span class="k">return</span> <span class="n">df</span></div>
 
 <div class="viewcode-block" id="munge_reservations"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.munge_reservations">[docs]</a><span class="k">def</span> <span class="nf">munge_reservations</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Summary</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cell (TYPE): Description</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        TYPE: Description</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;&#39;</span>
     <span class="n">fcfs</span> <span class="o">=</span> <span class="bp">False</span>
@@ -191,6 +321,14 @@
         <span class="k">return</span> <span class="n">cell</span></div>
 
 <div class="viewcode-block" id="munge_fees"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.munge_fees">[docs]</a><span class="k">def</span> <span class="nf">munge_fees</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Summary</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cell (TYPE): Description</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        TYPE: Description</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;&#39;</span>
     <span class="n">fees</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;\$\d+\.{0,1}\d*&#39;</span><span class="p">,</span> <span class="n">cell</span><span class="p">)</span>
@@ -210,6 +348,14 @@
     <span class="k">return</span> <span class="n">fee</span></div>
 
 <div class="viewcode-block" id="munge_water"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.munge_water">[docs]</a><span class="k">def</span> <span class="nf">munge_water</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Summary</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cell (TYPE): Description</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        TYPE: Description</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;&#39;</span>
     <span class="n">water</span> <span class="o">=</span> <span class="bp">False</span>
@@ -225,6 +371,14 @@
     <span class="k">return</span> <span class="n">water</span></div>
 
 <div class="viewcode-block" id="munge_restrooms"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.munge_restrooms">[docs]</a><span class="k">def</span> <span class="nf">munge_restrooms</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Summary</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cell (TYPE): Description</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        TYPE: Description</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;&#39;</span>
     <span class="n">vault</span> <span class="o">=</span> <span class="bp">False</span>
@@ -252,11 +406,27 @@
     <span class="k">return</span> <span class="n">restroom</span></div>
 
 <div class="viewcode-block" id="munge_elevation"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.munge_elevation">[docs]</a><span class="k">def</span> <span class="nf">munge_elevation</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Summary</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cell (TYPE): Description</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        TYPE: Description</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;&#39;</span>
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;\d*&#39;</span><span class="p">,</span> <span class="n">cell</span><span class="p">)))</span></div>
 
 <div class="viewcode-block" id="munge_campground_data"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.munge_campground_data">[docs]</a><span class="k">def</span> <span class="nf">munge_campground_data</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Summary</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        df (TYPE): Description</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        TYPE: Description</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># &#39;Munging reservations...&#39;</span>
     <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Reservations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Reservations&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">munge_reservations</span><span class="p">)</span>
     <span class="c1"># &#39;Munging fees...&#39;</span>
@@ -287,6 +457,14 @@
     <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="scrape_all_forests"><a class="viewcode-back" href="../../source/campstatus.html#campstatus.scrape_campsite_data.scrape_all_forests">[docs]</a><span class="k">def</span> <span class="nf">scrape_all_forests</span><span class="p">(</span><span class="n">URLS</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Summary</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        URLS (TYPE): Description</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        TYPE: Description</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">collect</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">forest</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">URLS</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
         <span class="k">print</span> <span class="s1">&#39;scraping {} National Forest&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">forest</span><span class="p">)</span>
