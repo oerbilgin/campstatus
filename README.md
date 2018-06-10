@@ -15,3 +15,13 @@ Wishlist:
 * Make a web front end other than google sheets
   to tabulate the campground data.
 
+## Dependencies
+* numpy
+* pandas
+* scikit-learn
+* geopy
+* requests
+* BeautifulSoup
+* re
+* gspread
+* oauth2client
