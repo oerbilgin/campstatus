@@ -30,14 +30,14 @@ campgrounds_final_table_columns = [
 
 # list of forests to scrape
 forests_to_scrape = [
-	'stanislaus',
-	'eldorado',
-	'tahoe',
+	# 'stanislaus',
+	# 'eldorado',
+	# 'tahoe',
 	'mendocino',
-	'plumas',
-	'lassen',
-	'stnf',
-	'sierra'
+	# 'plumas',
+	# 'lassen',
+	# 'stnf',
+	# 'sierra',
 ]
 
 # full list of national forest URL descriptors as keys, and full names

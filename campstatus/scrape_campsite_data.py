@@ -414,8 +414,12 @@ def munge_campground_data(df):
     df.loc[:, 'Elevation'] = df['Elevation'].apply(munge_elevation)
 
     df.fillna('', inplace=True)
-    columns = config.campgrounds_final_table_columns
-    return df[columns]
+
+    # empty dataframe containing all the desired columns
+    coltable = pd.DataFrame(columns=config.campgrounds_final_table_columns)
+    df = pd.concat([coltable, df])
+    
+    return df[config.campgrounds_final_table_columns]
 
 def get_forest_rec_url(forest_name, recreation_type='camping-cabins'):
     """Retrieves the url for the website listing all the campgrounds
