@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
 import geopy.distance
+import config
 
 def mean_of_mean_distance_to_centroid(kmeans_data, X):
 	"""Calculates all of the mean of mean distances to a centroid.
@@ -115,3 +116,11 @@ def group_points(
 	df.loc[clean.index, 'Geo Group'] = best_cluster.labels_
 
 	return df
+
+def main():
+	df = pd.read_csv(config.scraped_file)
+	result = df.groupby('Forest').apply(group_points)
+	result.to_csv(config.analyzed_file)
+
+if __name__ == '__main__':
+	main()

@@ -5,11 +5,15 @@
 # Defines which forest's campgrounds to scrape
 # key can be any text string
 # value must be a valid URL
-forest_urls = {
-     'Stanislaus': 'https://www.fs.usda.gov/activity/stanislaus/recreation/camping-cabins/?recid=14833&actid=29',
-     'Tahoe': 'https://www.fs.usda.gov/activity/tahoe/recreation/camping-cabins/?recid=55444&actid=29',
-    'El Dorado': 'https://www.fs.usda.gov/activity/eldorado/recreation/camping-cabins/?recid=71008&actid=29'
-}
+# forest_urls = {
+#      'Stanislaus': 'https://www.fs.usda.gov/activity/stanislaus/recreation/camping-cabins/?recid=14833&actid=29',
+#      'Tahoe': 'https://www.fs.usda.gov/activity/tahoe/recreation/camping-cabins/?recid=55444&actid=29',
+#     'El Dorado': 'https://www.fs.usda.gov/activity/eldorado/recreation/camping-cabins/?recid=71008&actid=29'
+# }
+
+# csv file to save when scraping, and/or to use for analyzing
+scraped_file = './scraped_campgrounds.csv'
+analyzed_file = './analyzed_campgrounds.csv'
 
 # desired final columns in the final table
 campgrounds_final_table_columns = [
