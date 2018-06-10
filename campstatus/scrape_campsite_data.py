@@ -418,7 +418,7 @@ def munge_campground_data(df):
     # empty dataframe containing all the desired columns
     coltable = pd.DataFrame(columns=config.campgrounds_final_table_columns)
     df = pd.concat([coltable, df])
-    
+
     return df[config.campgrounds_final_table_columns]
 
 def get_forest_rec_url(forest_name, recreation_type='camping-cabins'):
@@ -472,7 +472,7 @@ def scrape_all_forests(URLS):
     final = pd.concat(collect)
     return final
 
-if __name__ == '__main__':
+def main():
     # make the forest urls
     forest_urls = {}
     for forest in config.forests_to_scrape:
@@ -484,4 +484,7 @@ if __name__ == '__main__':
     print
     final = scrape_all_forests(forest_urls)
     final.to_csv('./scraped_campgrounds.csv', index=False)
+
+if __name__ == '__main__':
+    main()
 
