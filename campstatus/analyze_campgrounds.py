@@ -101,7 +101,14 @@ def group_points(
 	# get the number of clusters to make the mean "radius" of a cluster close to 2.5
 	# the average longest distance between two points will be 5 km
 	m = pd.np.asarray(all_mean_distances)
-	best_k = pd.np.argwhere(m <= 2.5).flatten()[0]
+	try:
+		best_k = pd.np.argwhere(m <= 2.5).flatten()[0]
+	except IndexError as e:
+		best_k = -1
+		print 'Warning: best_k is {} for {}'.format(
+			m[best_k],
+			df['Forest'].iloc[0]
+			)
 
 	best_cluster = kmeans_data[best_k]
 
