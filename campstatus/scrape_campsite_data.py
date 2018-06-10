@@ -101,7 +101,7 @@ def find_elevation_div(tag):
     See Also:
         * :func:`find_value`
     """
-    return find_tag_containing_text(tag, 'elevation')
+    return find_tag_containing_text(tag, 'elevation :')
 
 def find_latitude_div(tag):
     """Helper to find tags about elevation.
@@ -116,7 +116,7 @@ def find_latitude_div(tag):
     See Also:
         * :func:`find_value`
     """
-    return find_tag_containing_text(tag, 'latitude')
+    return find_tag_containing_text(tag, 'latitude :')
 
 def find_longitude_tag(tag):
     """Helper to find tags about elevation.
@@ -131,7 +131,7 @@ def find_longitude_tag(tag):
     See Also:
         * :func:`find_value`
     """
-    return find_tag_containing_text(tag, 'longitude') 
+    return find_tag_containing_text(tag, 'longitude :') 
 
 def find_value(soup, tag_function):
     """Gets the value in the element after the first found tag.
@@ -390,7 +390,7 @@ def munge_elevation(cell):
             elev_int = int(elev_str)
         except:
             print cell
-            elev_int = cell
+            elev_int = '???'
     return elev_int
 
 def munge_campground_data(df):
@@ -414,24 +414,10 @@ def munge_campground_data(df):
     df.loc[:, 'Elevation'] = df['Elevation'].apply(munge_elevation)
 
     df.fillna('', inplace=True)
-    columns = [
-        'Campground',
-        'Status',
-        'Fees',
-        'Open Season',
-        'Reservations',
-        'Restroom',
-        'Potable Water',
-        'Elevation',
-        'Latitude',
-        'Longitude',
-        'Usage',
-        'Water',
-        'URL',
-        ]
+    columns = config.campgrounds_final_table_columns
     return df[columns]
 
-def get_forest_urls(forest_names, recreation_type='camping-cabins'):
+def get_forest_rec_url(forest_name, recreation_type='camping-cabins'):
     """Retrieves the url for the website listing all the campgrounds
     or trailheads.
 
@@ -449,21 +435,18 @@ def get_forest_urls(forest_names, recreation_type='camping-cabins'):
             trail in the forest.
     
     """
-    forest_urls = {}
-    for forest_name in forest_names:
-        url = (
-            'https://www.fs.usda.gov/activity/{}/recreation/{}'
-            .format(forest_name, recreation_type))
-        r = requests.get(url)
-        soup = BeautifulSoup(r.text, 'html.parser')
-        tag = soup.find_all(find_campground_a)[0]
+    url = (
+        'https://www.fs.usda.gov/activity/{}/recreation/{}'
+        .format(forest_name, recreation_type))
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, 'html.parser')
+    tag = soup.find_all(find_campground_a)[0]
 
-        if tag.get('href') is None:
-            tag = tag.findParent('a')
-        suffix = tag.get('href')
-        url = url_pref + suffix
-        forest_urls[forest_name] = url
-    return forest_urls
+    if tag.get('href') is None:
+        tag = tag.findParent('a')
+    suffix = tag.get('href')
+    url = url_pref + suffix
+    return url
 
 def scrape_all_forests(URLS):
     """Summary
@@ -486,6 +469,15 @@ def scrape_all_forests(URLS):
     return final
 
 if __name__ == '__main__':
-    final = scrape_all_forests(config.forest_urls)
+    # make the forest urls
+    forest_urls = {}
+    for forest in config.forests_to_scrape:
+        full_name = config.AllNationalForests[forest]
+        url = get_forest_rec_url(forest)
+        forest_urls[full_name] = url
+    print 'These forests will be scraped:'
+    print forest_urls.keys()
+    print
+    final = scrape_all_forests(forest_urls)
     final.to_csv('./scraped_campgrounds.csv', index=False)
 
