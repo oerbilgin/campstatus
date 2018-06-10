@@ -105,7 +105,7 @@ def group_points(
 		best_k = pd.np.argwhere(m <= 2.5).flatten()[0]
 	except IndexError as e:
 		best_k = -1
-		print 'Warning: best_k is {} for {}'.format(
+		print 'Warning: best_k\'s radius is {} for {}, higher than desired 2.5'.format(
 			m[best_k],
 			df['Forest'].iloc[0]
 			)
