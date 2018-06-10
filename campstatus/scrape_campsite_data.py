@@ -1,20 +1,17 @@
 """Summary
 
 Attributes:
-    URLS (dict): Contains forest names and the url to the camping-cabins
-        page for each forest.
+    url_pref (str): prefix for the forest service
+
 """
 from bs4 import BeautifulSoup
 import update_campstatus as uc
 import requests
 import re
 import pandas as pd
+import config
 
-URLS = {
-    # 'Stanislaus': 'https://www.fs.usda.gov/activity/stanislaus/recreation/camping-cabins/?recid=14833&actid=29',
-    # 'Tahoe': 'https://www.fs.usda.gov/activity/tahoe/recreation/camping-cabins/?recid=55444&actid=29',
-    'El Dorado': 'https://www.fs.usda.gov/activity/eldorado/recreation/camping-cabins/?recid=71008&actid=29'
-}
+url_pref = 'https://www.fs.usda.gov'
 
 def get_campground_urls(forest_url):
     """Retrieves all the urls for campgrounds in a national forest.
@@ -34,7 +31,6 @@ def get_campground_urls(forest_url):
     r = requests.get(forest_url)
     soup = BeautifulSoup(r.text, 'html.parser')
     urls = []
-    url_pref = 'https://www.fs.usda.gov'
     for i in soup.find_all(re.compile("h\d")):
         if 'Campground Camping Areas' in i.contents:
             for j in i.find_next_siblings('ul'):
@@ -76,6 +72,21 @@ def find_tag_containing_text(tag, text):
         except:
             pass
     return result
+
+def find_campground_a(tag):
+    """Helper to find tags about campgrounds.
+    
+    Args:
+        tag (bs4.element.tag): Tag from BeautifulSoup parsed HTML site.
+    
+    Returns:
+        bool: True when the text 'Campground Camping' was found in the tag's contents,
+            False if not.
+
+    See Also:
+        * :func:`find_value`
+    """
+    return find_tag_containing_text(tag, 'Campground Camping')
 
 def find_elevation_div(tag):
     """Helper to find tags about elevation.
@@ -371,7 +382,16 @@ def munge_elevation(cell):
     """
     if pd.isnull(cell):
         return ''
-    return int(''.join(re.findall('\d*', cell)))
+    elif cell == '':
+        return ''
+    else:
+        elev_str = ''.join(re.findall('\d*', cell))
+        try:
+            elev_int = int(elev_str)
+        except:
+            print cell
+            elev_int = cell
+    return elev_int
 
 def munge_campground_data(df):
     """Summary
@@ -411,6 +431,40 @@ def munge_campground_data(df):
         ]
     return df[columns]
 
+def get_forest_urls(forest_names, recreation_type='camping-cabins'):
+    """Retrieves the url for the website listing all the campgrounds
+    or trailheads.
+
+    The output of this function can be piped directly to scrape_all_forests()
+    
+    Args:
+        forest_names (list(str, )): List of strings of the names of
+            the national forests that you want to scrape. Not case
+            sensitive, but must match what is in the config file lookup
+        recreation_type (str, optional): either camping-cabins or hiking
+    
+    Returns:
+        dict: key is the forest_name and value is url pointing to the
+            main page that contains links to each campground or hiking
+            trail in the forest.
+    
+    """
+    forest_urls = {}
+    for forest_name in forest_names:
+        url = (
+            'https://www.fs.usda.gov/activity/{}/recreation/{}'
+            .format(forest_name, recreation_type))
+        r = requests.get(url)
+        soup = BeautifulSoup(r.text, 'html.parser')
+        tag = soup.find_all(find_campground_a)[0]
+
+        if tag.get('href') is None:
+            tag = tag.findParent('a')
+        suffix = tag.get('href')
+        url = url_pref + suffix
+        forest_urls[forest_name] = url
+    return forest_urls
+
 def scrape_all_forests(URLS):
     """Summary
     
@@ -432,6 +486,6 @@ def scrape_all_forests(URLS):
     return final
 
 if __name__ == '__main__':
-    final = scrape_all_forests(URLS)
+    final = scrape_all_forests(config.forest_urls)
     final.to_csv('./scraped_campgrounds.csv', index=False)
 
