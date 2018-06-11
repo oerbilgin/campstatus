@@ -120,7 +120,7 @@ def group_points(
 def main():
 	df = pd.read_csv(config.scraped_file)
 	result = df.groupby('Forest').apply(group_points)
-	result.to_csv(config.analyzed_file)
+	result.to_csv(config.analyzed_file, index=False)
 
 if __name__ == '__main__':
 	main()
