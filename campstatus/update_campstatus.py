@@ -31,7 +31,7 @@ def open_camping_sheet(key):
     sheet = f.open_by_key(key).sheet1
     return sheet
 
-def update_sheet(sheet, campground_name, status, status_col=1):
+def update_sheet(sheet, campground_name, status, status_col=2):
     """Updates the appropriate cell with campground status"""
     try:
         cell = sheet.find(re.compile('(?i){}'.format(campground_name)))
@@ -65,7 +65,7 @@ def update_campground_status(sheet):
                         if not url.endswith('.pdf') and url is not None:
                             url = url_pref + url
                             status = get_campground_status(url)
-                            campname = k.getText().split(' Campground')[0]
+                            campname = k.getText()
                             update_sheet(sheet, campname, status)
 
 def main():
